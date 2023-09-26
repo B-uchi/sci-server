@@ -1,5 +1,5 @@
 import express from 'express'
-import { userDeposit, userTransactions, getUser } from '../controllers/deposit.js'
+import { userDeposit, userTransactions, getUser, fetchAllTransactions } from '../controllers/deposit.js'
 import { verifyToken } from '../middleware/auth.js';
 import { fetchWallets } from '../controllers/adminWallet.js';
 import { fetchPlans, setUserPlan } from '../controllers/adminPlan.js';
@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.post("/deposit", verifyToken, userDeposit);
 router.post("/me", verifyToken, getUser);
+router.post("/mee", verifyToken, fetchAllTransactions);
 router.get("/wallets", verifyToken, fetchWallets);
 router.get('/plans', verifyToken, fetchPlans)
 // router.get('/plans', login)

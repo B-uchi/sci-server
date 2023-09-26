@@ -1,6 +1,7 @@
 import { User } from "../models/User.js";
 import { Plan } from "../models/plan.js";
 import cron from "node-cron";
+import Transaction from "../models/transaction.js";
 
 export const registerPlan = async (req, res) => {
   try {
@@ -15,22 +16,35 @@ export const registerPlan = async (req, res) => {
       if (user.balance > minDeposit) {
         user.plan.status = true;
         user.plan.amount = Number(amount);
-        user.plan.daysleft = 30;
+        user.plan.daysleft = Number(30);
         user.plan.balance = Number(amount);
         user.plan.percent = plan.profit / 100 / 30;
+        const deposit = new Transaction({
+          email: email,
+          to: "PLAN DEPOSIT",
+          coin: `${plan.title} plan deposit`,
+          coin_amt: amount,
+          amt: amount,
+          status: true,
+        });
+        const savedTransaction = await deposit.save();
         user.plan.addedAmt = user.plan.percent * user.plan.amount;
+        user.balance -= Number(amount);
         user.markModified("plan");
+        user.markModified("balance");
         await user.save();
-        cron.schedule("0 1 * * *", async () => {
+        const updatebal = cron.schedule("* * * * *", async () => {
+          user.plan.daysleft += -1;
           user.plan.balance += user.plan.addedAmt;
-          user.plan.daysleft -= 1;
           console.log("Cron Succesfull");
           user.markModified("plan");
           await user.save();
-          if ((user.plan.daysleft = 0)) {
+          if (user.plan.daysleft === 0) {
+            updatebal.stop();
             return res.sendStatus(202);
           }
         });
+        updatebal.start();
         return res.sendStatus(200);
       } else {
         return res.status(400).json({ message: "Insufficient balance" });

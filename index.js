@@ -8,7 +8,6 @@ import morgan from "morgan";
 import authRoutes from "./routes/auth.js";
 import accountRoutes from "./routes/account.js";
 import adminRoutes from "./routes/admin.js";
-import cron from "node-cron";
 
 dotenv.config();
 const app = express();
@@ -25,9 +24,6 @@ app.use("/auth", authRoutes);
 app.use("/account", accountRoutes);
 app.use("/admin", adminRoutes);
 app.get('/', (req, res)=>{
-  cron.schedule("*/2 * * * *", async () => {
-    console.log('Cronn')
-  });
   res.status(200).send('Successful')
 })
 

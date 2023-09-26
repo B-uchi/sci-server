@@ -34,11 +34,21 @@ export const getUser = async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 };
+export const fetchAllTransactions = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const transactionList = await Transaction.find({ email: email });
+    res.status(201).json({ transactionList: transactionList });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
 
 export const userTransactions = async (req, res) => {
   try {
     const { email } = req.body;
-    const transactionList = await Transaction.find({ email: email });
+    const user = await User.findOne({ email: email });
+    const transactionList = user.transactions
     res.status(201).json({ transactionList: transactionList });
   } catch (error) {
     res.status(500).send({ message: error.message });
